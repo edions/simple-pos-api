@@ -15,8 +15,8 @@ use crate::{
 
 pub fn app_router(app_state: Arc<AppState>) -> Router {
     Router::new()
-        .route("/",get(root))
-            .nest("/api/", auth_route(app_state.clone()))
+        .route("/", get(root))
+            .nest("/api", auth_route(app_state.clone()))
             .nest("/api/product", product_route(app_state.clone()))
             .nest("/api/category", category_route(app_state.clone()))
             .nest("/api/transaction", transaction_route(app_state.clone()))
@@ -47,30 +47,36 @@ async fn handler_404() -> impl IntoResponse {
         "The requested resource was not found"
     )
 }
+async fn handle_405() -> impl IntoResponse {
+    "Method not allowed fallback"
+}
 
 pub fn auth_route(app_state: Arc<AppState>) -> Router {
     Router::new()
         .route("/login", post(login))
         .route("/signup", post(signup))
         .with_state(app_state)
+        .method_not_allowed_fallback(handle_405)
 }
 
 pub fn product_route(app_state: Arc<AppState>) -> Router {
     Router::new()
         .route("/", get(get_all_products).post(create_product))
-        .route("/:product_id", get( get_product)
+        .route("/{product_id}", get( get_product)
             .patch(update_product)
             .delete(delete_product))
         .route_layer(middleware::from_fn_with_state(app_state.clone(), auth))
         .with_state(app_state)
+        .method_not_allowed_fallback(handle_405)
 }
 
 pub fn category_route(app_state: Arc<AppState>) -> Router {
     Router::new()
         .route("/", get(get_all_categories).post(create_category))
-        .route("/:category_id", patch(update_category).delete(delete_category))
+        .route("/{category_id}", patch(update_category).delete(delete_category))
         .route_layer(middleware::from_fn_with_state(app_state.clone(), auth))
         .with_state(app_state)
+        .method_not_allowed_fallback(handle_405)
 }
 
 pub fn transaction_route(app_state: Arc<AppState>) -> Router {
@@ -78,4 +84,5 @@ pub fn transaction_route(app_state: Arc<AppState>) -> Router {
         .route("/", get(get_all_transactions).post(create_transaction))
         .route_layer(middleware::from_fn_with_state(app_state.clone(), auth))
         .with_state(app_state)
+        .method_not_allowed_fallback(handle_405)
 }

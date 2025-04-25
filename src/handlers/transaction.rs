@@ -14,13 +14,13 @@ use crate::{
 
 pub async fn get_all_transactions(
     State(app_state): State<Arc<AppState>>,
-    filter_options: Option<Query<FilterOptionsModel>>,
+    Query(filter_options): Query<FilterOptionsModel>,
 ) -> Result<impl IntoResponse, (StatusCode, Json<Value>)> {
 
-    let Query(opts) = filter_options.unwrap_or_default();
+    // let Query(opts) = filter_options.unwrap_or_default();
 
-    let limit = opts.limit.unwrap_or(20);
-    let offset = (opts.offset.unwrap_or(1) - 1) * limit;
+    let limit = filter_options.limit.unwrap_or(20);
+    let offset = (filter_options.offset.unwrap_or(1) - 1) * limit;
 
     let total_transactions: Option<i64> = sqlx::query_scalar!(
         r#"

@@ -30,6 +30,15 @@ git clone https://github.com/edions/simple-pos-api.git
 cd simple-pos-api
 cargo run
 ```
+
+Using Docker
+```
+git clone https://github.com/edions/simple-pos-api.git
+cd simple-pos-api
+cargo sqlx prepare
+docker build .
+docker run -p 3000:3000 pos-api
+```
 The server will be accessible at `http://localhost:3000` (or another configured port).
 
 ## 📚 API Endpoints
